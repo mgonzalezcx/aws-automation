@@ -426,15 +426,14 @@ if (!([Utility]::Exists("${lockdir}\cxhfinstall.lock"))) {
 }
 
 #Reconfigure Access Control on Manager
-if ($isManager) {​​​
-Write-Host"$(Get-Date) reconfiguring access control"
-Start-Installer -command (Find-Artifact -artifact "CxSetup.exe") `
-                    -installerArguments "/install /quiet RECONFIGURE_ACCESS_CONTROL=1"
-Write-Host"$(Get-Date) restarting IIS"
+if ($isManager) {
+    Write-Host"$(Get-Date) reconfiguring access control"
+    Start-Installer -command (Find-Artifact -artifact "CxSetup.exe") -installerArguments "/install /quiet RECONFIGURE_ACCESS_CONTROL=1"
+    Write-Host"$(Get-Date) restarting IIS"
     iisreset
-Write-Host"$(Get-Date) waking up the identity authority"
+    Write-Host"$(Get-Date) waking up the identity authority"
     iwr -uri "https://$($config.Checkmarx.fqdn)/cxrestapi/auth" -UseBasicParsing
-}​​​
+}
 
 ###############################################################################
 # Post Install Windows Configuration
@@ -817,11 +816,6 @@ try {
             $log.Info("Updating WebServer")
             $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.WebServer)' where [key] = 'WebServer'")
         }
-
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.SamlServiceProviderIssuer))) {
-            $log.Info("Updating SamlServiceProviderIssuer")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.SamlServiceProviderIssuer)' where [key] = 'SamlServiceProviderIssuer'")
-        }
             
         if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.ActiveMessageQueueURL))) {
             $log.Info("Updating ActiveMessageQueueURL")
@@ -853,41 +847,6 @@ try {
             $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.IsLongPathEnabled)' where [key] = 'IsLongPathEnabled'")
         }
 
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.MaxConcurrentJobs))) {
-            $log.Info("Updating MaxConcurrentJobs")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.MaxConcurrentJobs)' where [key] = 'MaxConcurrentJobs'")
-        }
-
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.MaxParallelReports))) {
-            $log.Info("Updating MaxParallelReports")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.MaxParallelReports)' where [key] = 'MaxParallelReports'")
-        }
-
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.NumberOfPromotableScans))) {
-            $log.Info("Updating NumberOfPromotableScans")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.NumberOfPromotableScans)' where [key] = 'NumberOfPromotableScans'")
-        }
-
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.RESULT_ATTRIBUTES_PER_SIMILARITY))) {
-            $log.Info("Updating RESULT_ATTRIBUTES_PER_SIMILARITY")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.RESULT_ATTRIBUTES_PER_SIMILARITY)' where [key] = 'RESULT_ATTRIBUTES_PER_SIMILARITY'")
-        }
-
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.UnzipLocalPath))) {
-            $log.Info("Updating UnzipLocalPath")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.UnzipLocalPath)' where [key] = 'UnzipLocalPath'")
-        }
-
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.MandatoryCommentOnChangeResultStateToNE))) {
-            $log.Info("Updating MandatoryCommentOnChangeResultStateToNE")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.MandatoryCommentOnChangeResultStateToNE)' where [key] = 'MandatoryCommentOnChangeResultStateToNE'")
-        }
-
-        if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.MandatoryCommentOnChangeResultState))) {
-            $log.Info("Updating MandatoryCommentOnChangeResultState")
-            $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.CxComponentConfiguration.MandatoryCommentOnChangeResultState)' where [key] = 'MandatoryCommentOnChangeResultState'")
-        }
-
         if (!([String]::IsNullOrEmpty($config.CxComponentConfiguration.ACTIVE_MESSAGE_QUEUE_URL))) {
             $log.Info("Updating ACTIVE_MESSAGE_QUEUE_URL")
             $cxdb.ExecuteNonQuery("update [Config].[CxEngineConfigurationKeysMeta] set [value] = '$($config.CxComponentConfiguration.ACTIVE_MESSAGE_QUEUE_URL)' where [key] = 'ACTIVE_MESSAGE_QUEUE_URL'")
@@ -899,12 +858,12 @@ try {
         }
 
         if (!([String]::IsNullOrEmpty($config.Amq.Password))) {
-            $log.Info("Updating SERVER_PUBLIC_ORIGIN")
+            $log.Info("Updating AMQ_Password")
             $cxdb.ExecuteNonQuery("update [dbo].[CxComponentConfiguration] set [value] = '$($config.Amq.Password)' where [key] = 'MessageQueuePassword'")
         }
 
         if (!([String]::IsNullOrEmpty($config.Amq.Password))) {
-            $log.Info("Updating SERVER_PUBLIC_ORIGIN")
+            $log.Info("Updating AMQ_Password")
             $cxdb.ExecuteNonQuery("Update [Config].[CxEngineConfigurationKeysMeta] set [DefaultValue] = (SELECT TOP 1 [Value]  FROM [CxDB].[dbo].[CxComponentConfiguration]  where [Key] = 'MessageQueuePassword') where [KeyName]='MESSAGE_QUEUE_PASSWORD'")
         }
     }
